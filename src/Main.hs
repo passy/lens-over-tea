@@ -18,7 +18,9 @@ _2 setter (a, b) = (\x -> (a, x)) <$> setter b
 
 -- Make a lens out of a getter and a setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
-lens get set = _
+lens get set setter val =
+  let old = setter $ get val
+  in set val <$> old
 
 -- Combine 2 lenses to make a lens which works on Either. (It's a good idea
 -- to try to use bimap for this, but it won't work, and you have to use
