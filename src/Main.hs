@@ -10,11 +10,11 @@ type Lens' s a = Lens s s a a
 
 -- _1 :: Functor f => (a -> f b) -> (a, x) -> f (b, x)
 _1 :: Lens (a, x) (b, x) a b
-_1 = _
+_1 setter (a, b) = (\x -> (x, b)) <$> setter a
 
 -- _2 :: Functor f => (a -> f b) -> (x, a) -> f (x, b)
 _2 :: Lens (x, a) (x, b) a b
-_2 = _
+_2 setter (a, b) = (\x -> (a, x)) <$> setter b
 
 -- Make a lens out of a getter and a setter.
 lens :: (s -> a) -> (s -> b -> t) -> Lens s t a b
@@ -42,5 +42,10 @@ choosing l1 l2 = _
 united :: Lens' s ()
 united = _
 
+view :: Lens s t a b -> s -> a
+view lens s = x
+  where
+    Const x = lens Const s
+
 main :: IO ()
-main = print "Hi"
+main = print $ view _1 (1, 2)
