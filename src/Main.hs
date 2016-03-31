@@ -1,6 +1,6 @@
+{-# LANGUAGE LambdaCase    #-}
 {-# LANGUAGE RankNTypes    #-}
 {-# LANGUAGE TupleSections #-}
-{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
@@ -57,4 +57,7 @@ over :: Lens s t a b -> ((a -> b) -> s -> t)
 over l f = runIdentity . l (Identity . f)
 
 main :: IO ()
-main = print $ view _2 (1, 2)
+main = do
+  print $ view _1 (1, 2)
+  print $ view _2 (1, 2)
+  print $ over _1 (* 44) (1, 2)
