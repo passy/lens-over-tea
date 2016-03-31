@@ -58,7 +58,7 @@ over :: Lens s t a b -> ((a -> b) -> s -> t)
 over l f = runIdentity . l (Identity . f)
 
 set :: Lens s t a b -> b -> s -> t
-set l v = over l (const v)
+set = (. const) . over
 
 _abs :: Real a => Lens' a a
 _abs f n = update <$> f (abs n)
