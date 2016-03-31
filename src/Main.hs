@@ -57,6 +57,9 @@ view lens s = x
 over :: Lens s t a b -> ((a -> b) -> s -> t)
 over l f = runIdentity . l (Identity . f)
 
+set :: Lens s t a b -> b -> s -> t
+set l v = over l (const v)
+
 _abs :: Real a => Lens' a a
 _abs f n = update <$> f (abs n)
   where
@@ -78,4 +81,4 @@ main = do
   print $ over _1 (* 44) (1, 2)
   print $ over _1 (* 44) (1, 2)
   print $ over _abs (^ 2) (-10)
-  print $ over (_all 0) (const 1337) [100, 200, 0, 300, 0, 400]
+  print $ set (_all 0) 1337 [100, 200, 0, 300, 0, 400]
