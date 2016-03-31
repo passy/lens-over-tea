@@ -1,9 +1,11 @@
 {-# LANGUAGE RankNTypes    #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Main where
 
 import           Control.Applicative
+import           Data.Functor.Identity
 
 type Lens s t a b = forall f. Functor f => (a -> f b) -> s -> f t
 type Lens' s a = Lens s s a a
@@ -27,7 +29,9 @@ lens get set setter val =
 -- explicit case-matching. Still a good idea, tho.)
 choosing :: Lens s1 t1 a b -> Lens s2 t2 a b
          -> Lens (Either s1 s2) (Either t1 t2) a b
-choosing l1 l2 = _
+choosing l1 l2 f = \case
+  Left s1 -> Left <$> l1 f s1
+  Right s2 -> Right <$> l2 f s2
 
 -- Modify the target of a lens and return the result. (Bonus points if you
 -- do it without lambdas and defining new functions. There's also a hint
@@ -49,5 +53,8 @@ view lens s = x
   where
     Const x = lens Const s
 
+over :: Lens s t a b -> ((a -> b) -> s -> t)
+over l f = runIdentity . l (Identity . f)
+
 main :: IO ()
-main = print $ view _1 (1, 2)
+main = print $ view _2 (1, 2)
