@@ -2,9 +2,10 @@
 
 module Main where
 
-import Control.Applicative
-import Data.Functor.Identity
-import qualified Data.Traversable as T
+import           Control.Applicative
+import           Data.Functor.Identity
+import           Data.Monoid           (First (First), getFirst)
+import qualified Data.Traversable      as T
 
 type AppLens s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 type AppLens' s a = AppLens s s a a
@@ -28,8 +29,16 @@ _all' ref f = T.traverse update
 toListOf :: ((a -> Const [a] a) -> s -> Const [a] s) -> s -> [a]
 toListOf l = getConst . l (\x -> Const [x])
 
+preview
+  :: ((a -> Const (First a) a) -> s -> Const (First a) s)
+  -> s
+  -> Maybe a
+preview l = getFirst . getConst . l (Const . First . Just)
+
 main :: IO ()
 main = do
   print $ set (_all' 0) 42 [ 0, 10, 0, 20, 0, 30 ]
   print $ toListOf (_all' 0) [0, 3, 0, 1]
   print $ toListOf (_all' 0) mempty
+  print $ preview (_all' 0) [0, 3, 0, 1]
+  print $ preview (_all' 0) mempty
