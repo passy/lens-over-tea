@@ -4,7 +4,8 @@ module Main where
 
 import           Control.Applicative
 import           Data.Functor.Identity
-import           Data.Monoid           (First (First), getFirst, Any (Any), getAny, (<>))
+import           Data.Monoid           (Any (Any), First (First), getAny,
+                                        getFirst, (<>), Endo (Endo), appEndo)
 import qualified Data.Traversable      as T
 
 type AppLens s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
@@ -12,18 +13,6 @@ type AppLens' s a = AppLens s s a a
 
 type Getting r s a = (a -> Const r a) -> s -> Const r s
 type Setting s t a b = (a -> Identity b) -> s -> Identity t
-
-data AppendList a = JustList [a] | Append (AppendList a) (AppendList a)
-  deriving (Show, Eq)
-
-doAppends :: AppendList a -> [a]
-doAppends (JustList a) = a
-doAppends (Append (JustList x) y) = x <> doAppends y
-doAppends (Append (Append a b) y) = doAppends (Append a (Append b y))
-
-instance Monoid (AppendList a) where
-  mempty = JustList []
-  mappend = Append
 
 view :: Getting a s a -> s -> a
 view l = getConst . l Const
@@ -38,8 +27,8 @@ _all' :: Eq a => a -> AppLens' [a] a
 _all' ref f = T.traverse update
   where update old = if old == ref then f old else pure old
 
-toListOf :: Getting [a] s a -> s -> [a]
-toListOf l = doAppends . getConst . l (\x -> Const (JustList [x]))
+toListOf :: Getting (Endo [a]) s a -> s -> [a]
+toListOf l = (`appEndo` []) . getConst . l (\x -> Const (Endo (x:)))
 
 preview
   :: Getting (First a) s a
