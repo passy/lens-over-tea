@@ -4,7 +4,7 @@ module Main where
 
 import           Control.Applicative
 import           Data.Functor.Identity
-import           Data.Monoid           (First (First), getFirst)
+import           Data.Monoid           (First (First), getFirst, Any (Any), getAny)
 import qualified Data.Traversable      as T
 
 type AppLens s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
@@ -35,6 +35,12 @@ preview
   -> Maybe a
 preview l = getFirst . getConst . l (Const . First . Just)
 
+has
+  :: ((a -> Const Any a) -> s -> Const Any s)
+  -> s
+  -> Bool
+has l = getAny . getConst . l (const . Const $ Any True)
+
 main :: IO ()
 main = do
   print $ set (_all' 0) 42 [ 0, 10, 0, 20, 0, 30 ]
@@ -42,3 +48,5 @@ main = do
   print $ toListOf (_all' 0) mempty
   print $ preview (_all' 0) [0, 3, 0, 1]
   print $ preview (_all' 0) mempty
+  print $ has (_all' 0) [0, 3, 0, 1]
+  print $ has (_all' 0) mempty
