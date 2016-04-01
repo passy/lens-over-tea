@@ -10,10 +10,10 @@ import qualified Data.Traversable      as T
 type AppLens s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
 type AppLens' s a = AppLens s s a a
 
-type Getting s a = (a -> Const a a) -> s -> Const a s
+type Getting r s a = (a -> Const r a) -> s -> Const r s
 type Setting s t a b = (a -> Identity b) -> s -> Identity t
 
-view :: Getting s a -> s -> a
+view :: Getting a s a -> s -> a
 view l = getConst . l Const
 
 over :: Setting s t a b -> (a -> b) -> s -> t
@@ -26,17 +26,17 @@ _all' :: Eq a => a -> AppLens' [a] a
 _all' ref f = T.traverse update
   where update old = if old == ref then f old else pure old
 
-toListOf :: ((a -> Const [a] a) -> s -> Const [a] s) -> s -> [a]
+toListOf :: Getting [a] s a -> s -> [a]
 toListOf l = getConst . l (\x -> Const [x])
 
 preview
-  :: ((a -> Const (First a) a) -> s -> Const (First a) s)
+  :: Getting (First a) s a
   -> s
   -> Maybe a
 preview l = getFirst . getConst . l (Const . First . Just)
 
 has
-  :: ((a -> Const Any a) -> s -> Const Any s)
+  :: Getting Any s a
   -> s
   -> Bool
 has l = getAny . getConst . l (const . Const $ Any True)
