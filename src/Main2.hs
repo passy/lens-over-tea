@@ -42,6 +42,10 @@ has
   -> Bool
 has l = getAny . getConst . l (const . Const $ Any True)
 
+_head :: Traversal' [a] a
+_head f [] = pure []
+_head f (x:xs) = (:) <$> f x <*> pure xs
+
 main :: IO ()
 main = do
   print $ set (_all' 0) 42 [ 0, 10, 0, 20, 0, 30 ]
@@ -51,3 +55,5 @@ main = do
   print $ preview (_all' 0) mempty
   print $ has (_all' 0) [0, 3, 0, 1]
   print $ has (_all' 0) mempty
+  print $ preview _head [1, 2, 3]
+  print $ preview _head ([] :: [Int])
