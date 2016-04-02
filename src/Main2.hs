@@ -8,8 +8,8 @@ import           Data.Monoid           (Any (Any), First (First), getAny,
                                         getFirst, (<>), Endo (Endo), appEndo)
 import qualified Data.Traversable      as T
 
-type AppLens s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
-type AppLens' s a = AppLens s s a a
+type Traversal s t a b = forall f. Applicative f => (a -> f b) -> s -> f t
+type Traversal' s a = Traversal s s a a
 
 type Getting r s a = (a -> Const r a) -> s -> Const r s
 type Setting s t a b = (a -> Identity b) -> s -> Identity t
@@ -23,7 +23,7 @@ over l f = runIdentity . l (Identity . f)
 set  :: Setting s t a b -> b -> s -> t
 set l f = over l $ const f
 
-_all' :: Eq a => a -> AppLens' [a] a
+_all' :: Eq a => a -> Traversal' [a] a
 _all' ref f = T.traverse update
   where update old = if old == ref then f old else pure old
 
