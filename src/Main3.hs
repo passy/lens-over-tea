@@ -26,3 +26,4 @@ get' t = Const [t]
 main :: IO ()
 main = do
   print . fmap (unwrapped get') . unwrapped set' $ Toy
+  print . getCompose . unwrapped (Compose . fmap get' . set') $ Toy
