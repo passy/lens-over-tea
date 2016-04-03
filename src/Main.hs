@@ -50,9 +50,7 @@ united :: Lens' s ()
 united = lens (const ()) const
 
 view :: Lens s t a b -> s -> a
-view lens s = x
-  where
-    Const x = lens Const s
+view l = getConst . l Const
 
 over :: Lens s t a b -> ((a -> b) -> s -> t)
 over l f = runIdentity . l (Identity . f)
